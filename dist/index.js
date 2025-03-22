@@ -9149,9 +9149,9 @@ function run() {
         core.debug(JSON.stringify(github.context));
         const ctx = github.context;
         const pr = ctx.payload.pull_request;
-        const branch = pr.head.ref;
         const version = pr.head.sha;
         const pr_number = pr.number;
+        const branch = pr.head.ref;
         const action = core.getInput("action");
         const issue = ctx.issue;
         const pipeline = process.env.HEROKU_PIPELINE_ID;
@@ -9195,7 +9195,6 @@ function run() {
                 return;
             }
             const { url } = yield octokit.rest.repos.downloadTarballArchive({
-                method: "HEAD",
                 owner: issue.owner,
                 repo: issue.repo,
                 ref: branch,
@@ -9203,6 +9202,7 @@ function run() {
             try {
                 core.info("Creating Review App");
                 core.debug(JSON.stringify({
+                    url,
                     branch,
                     pipeline,
                     source_blob: {
@@ -9213,7 +9213,7 @@ function run() {
                 }));
                 const response = yield heroku.post("/review-apps", {
                     body: {
-                        branch,
+                        branch: `${branch}:${pr_number}`,
                         pipeline,
                         source_blob: {
                             url,

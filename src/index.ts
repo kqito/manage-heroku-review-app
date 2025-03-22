@@ -18,9 +18,9 @@ async function run() {
 
   const ctx = github.context;
   const pr = ctx.payload.pull_request!;
-  const branch = pr.head.ref;
   const version = pr.head.sha;
   const pr_number = pr.number;
+  const branch = pr.head.ref;
   const action = core.getInput("action");
   const issue = ctx.issue;
   const pipeline = process.env.HEROKU_PIPELINE_ID;
@@ -79,7 +79,6 @@ async function run() {
 
     const { url }: TarballResponse =
       await octokit.rest.repos.downloadTarballArchive({
-        method: "HEAD",
         owner: issue.owner,
         repo: issue.repo,
         ref: branch,
@@ -89,6 +88,7 @@ async function run() {
       core.info("Creating Review App");
       core.debug(
         JSON.stringify({
+          url,
           branch,
           pipeline,
           source_blob: {
@@ -100,7 +100,7 @@ async function run() {
       );
       const response = await heroku!.post("/review-apps", {
         body: {
-          branch,
+          branch: `${branch}:${pr_number}`,
           pipeline,
           source_blob: {
             url,
