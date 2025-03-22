@@ -81,7 +81,7 @@ async function run() {
       await octokit.rest.repos.downloadTarballArchive({
         owner: issue.owner,
         repo: issue.repo,
-        ref: branch,
+        ref: pr.head.sha,
       });
 
     try {
